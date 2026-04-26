@@ -36,15 +36,16 @@ const NORMAL_RANGES = {
 // ── Global state ──────────────────────────────────────────────────────────
 let _debugData = {};
 
+// ── Unhide page immediately (removes flash-of-hidden-content risk) ─────────
+document.documentElement.removeAttribute("hidden");
+
 // ── Entry point ───────────────────────────────────────────────────────────
 FHIR.oauth2.ready()
   .then(client => {
-    console.log("✅ SMART auth successful. FHIR server:", client.state.serverUrl);
     return loadAll(client);
   })
   .catch(err => {
     showError("Authentication failed: " + (err.message || err));
-    console.error(err);
   });
 
 // ── Load all resources ────────────────────────────────────────────────────
