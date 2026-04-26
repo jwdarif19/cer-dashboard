@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" hidden>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Discharge Dashboard - Launch</title>
+</head>
+<body>
+  <p>Launching app, please wait...</p>
+
+  <!--
+    fhir-client.js handles the full SMART on FHIR OAuth2 launch sequence:
+      1. Reads  ?iss=  and  ?launch=  query params injected by Cerner
+      2. Fetches the FHIR server's metadata to discover the authorization URL
+      3. Redirects to the auth server with client_id, scopes, and launch context
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
+  <script>
+    FHIR.oauth2.authorize({
+      // ── STEP 1 ──────────────────────────────────────────────────────────
+      // Replace this with the client_id you receive after registering your
+      // app in the Cerner code console (https://code.cerner.com).
+      // It looks like: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      client_id: "REPLACE_WITH_YOUR_CLIENT_ID",
+
+      // ── STEP 2 ──────────────────────────────────────────────────────────
+      // Scopes tell Cerner exactly what data your app is allowed to read.
+      // - patient/Patient.read       → read the current patient's demographics
+      // - patient/Observation.read   → read vitals, lab results
+      // - patient/Condition.read     → read diagnoses
+      // - patient/MedicationRequest.read → read prescriptions
+      // - patient/DiagnosticReport.read  → read lab & radiology reports
+      // - launch                     → required for EHR-embedded launch
+      // - openid profile             → get logged-in user identity
+      // - online_access              → keep session alive while user is online
+      scope: [
+        "patient/Patient.read",
+        "patient/Observation.read",
+        "patient/Condition.read",
+        "patient/MedicationRequest.read",
+        "patient/DiagnosticReport.read",
+        "launch",
+        "openid",
+        "profile",
+        "online_access"
+      ].join(" ")
+    });
+  </script>
+</body>
+</html>
