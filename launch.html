@@ -33,13 +33,16 @@
       // - openid profile             → get logged-in user identity
       // - online_access              → keep session alive while user is online
       scope: [
-        "patient/Patient.read",
-        "patient/Observation.read",
-        "patient/Condition.read",
-        "patient/MedicationRequest.read",
-        "patient/DiagnosticReport.read",
+        "user/Patient.read",
+        "user/Observation.read",
+        "user/Condition.read",
+        "user/MedicationRequest.read",
+        "user/DiagnosticReport.read",
+        "user/Encounter.read",
+        "user/DocumentReference.read",
         "launch",
         "openid",
+        "fhirUser",
         "profile",
         "online_access"
       ].join(" ")

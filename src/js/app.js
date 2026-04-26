@@ -65,12 +65,15 @@ async function loadAll(client) {
     _debugData.patient = patient;
     renderPatient(patient);
 
+    // Get patient ID for explicit queries (more reliable with Cerner SMART v2)
+    const pid = patient.id;
+
     // 3. Parallel fetch of all clinical data
     const [observations, conditions, medications, reports] = await Promise.allSettled([
-      fetchAllPages(client, "Observation?category=vital-signs&_sort=-date&_count=20"),
-      fetchAllPages(client, "Condition?clinical-status=active&_count=50"),
-      fetchAllPages(client, "MedicationRequest?status=active&_count=50"),
-      fetchAllPages(client, "DiagnosticReport?_sort=-date&_count=20")
+      fetchAllPages(client, "Observation?patient=" + pid + "&category=vital-signs&_sort=-date&_count=20"),
+      fetchAllPages(client, "Condition?patient=" + pid + "&clinical-status=active&_count=50"),
+      fetchAllPages(client, "MedicationRequest?patient=" + pid + "&status=active&_count=50"),
+      fetchAllPages(client, "DiagnosticReport?patient=" + pid + "&_sort=-date&_count=20")
     ]);
 
     const obs   = observations.status === "fulfilled" ? observations.value : [];
