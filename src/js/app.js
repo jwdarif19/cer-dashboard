@@ -104,18 +104,13 @@ async function loadAll(client) {
   }
 }
 
-// ── Fetch all pages from a FHIR bundle ───────────────────────────────────
+// ── Fetch first page only from a FHIR bundle (avoids infinite pagination) ─
 async function fetchAllPages(client, path) {
   let entries = [];
-  let url = path;
-  while (url) {
-    const bundle = await client.request(url);
-    if (bundle.entry) {
-      entries = entries.concat(bundle.entry.map(e => e.resource).filter(Boolean));
-    }
-    // Follow 'next' link if present
-    const nextLink = (bundle.link || []).find(l => l.relation === "next");
-    url = nextLink ? nextLink.url : null;
+  // Only fetch first page — Cerner sandbox can have very large result sets
+  const bundle = await client.request(path);
+  if (bundle.entry) {
+    entries = bundle.entry.map(e => e.resource).filter(Boolean);
   }
   return entries;
 }
