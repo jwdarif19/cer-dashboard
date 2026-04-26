@@ -19,54 +19,34 @@ smart-on-fhir-app/
 
 ## PART 1 — Sign Up for a Cerner / Oracle Health Developer Account
 
-1. Go to: **https://code.cerner.com**
-   (This now redirects to oracle.com/health/developer)
+1. Go to: **https://cernercare.com** and sign in (or create a free account).
 
-2. Click **"Sign In"** → then **"Create an Account"** if you don't have one.
-   - Use a valid email address
-   - This is completely free for developers
+2. Once logged in, navigate to the **Oracle Health Code Console**:
+   **https://code-console.cerner.com**
 
-3. Once logged in, you'll land on the **Code Console** where you can register apps.
+3. You'll land on **My Applications** where you can register and manage apps.
 
 ---
 
-## PART 2 — Register Your App in the Code Console
+## PART 2 — App Registration (Already Done ✅)
 
-After logging in to code.cerner.com:
+This app has already been registered on the Oracle Health Code Console.
 
-1. Click the **"+ New App"** button (top right).
+| Field              | Value                                                        |
+|--------------------|--------------------------------------------------------------|
+| App Name           | Discharge Readiness Dashboard                                |
+| Application ID     | `28becaff-9234-48b8-8895-45b9648d6343`                      |
+| **Client ID**      | **`87ffc00b-db23-430c-a7e2-a8babbdcc16c`**                  |
+| SMART Launch URI   | `https://jwdarif19.github.io/cer-dashboard/launch.html`     |
+| Redirect URI       | `https://jwdarif19.github.io/cer-dashboard/`                |
+| App Type           | Provider / Online / Public / SMART v2                        |
+| FHIR Version       | R4                                                           |
+| Support Email      | jwdarif19@gmail.com                                          |
 
-2. Fill in the registration form:
+The `launch.html` file already contains the real `client_id`. No further changes needed.
 
-   | Field              | Value                                         |
-   |--------------------|-----------------------------------------------|
-   | App Name           | Discharge Readiness Dashboard                 |
-   | SMART Launch URI   | `https://YOUR-GITHUB-USERNAME.github.io/smart-on-fhir-app/launch.html` |
-   | Redirect URI       | `https://YOUR-GITHUB-USERNAME.github.io/smart-on-fhir-app/` |
-   | App Type           | Provider                                      |
-   | FHIR Spec          | R4                                            |
-   | Authorized         | Yes                                           |
-
-3. Under **Patient Scopes**, select:
-   - Patient: read
-   - Observation: read
-   - Condition: read
-   - MedicationRequest: read
-   - DiagnosticReport: read
-
-4. Click **"Register"**.
-
-5. You'll see a banner with your **Client ID** — copy it.
-   It looks like: `a1b2c3d4-e5f6-7890-abcd-ef1234567890`
-
-6. Open `launch.html` in this folder and replace:
-   ```javascript
-   client_id: "REPLACE_WITH_YOUR_CLIENT_ID"
-   ```
-   with your actual client ID.
-
-> ⚠️ After registering, wait **10 minutes** before testing — Cerner needs time
-> to propagate your app details across the sandbox environment.
+> ⚠️ After any re-registration, wait **10 minutes** before testing — Cerner needs time
+> to propagate app details across the sandbox environment.
 
 ---
 
