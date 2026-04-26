@@ -32,14 +32,16 @@
       // - launch                     → required for EHR-embedded launch
       // - openid profile             → get logged-in user identity
       // - online_access              → keep session alive while user is online
+      // SMART v2 granular scopes: format is user/Resource.cs where
+      // c = create, r = read, u = update, d = delete, s = search
       scope: [
-        "user/Patient.read",
-        "user/Observation.read",
-        "user/Condition.read",
-        "user/MedicationRequest.read",
-        "user/DiagnosticReport.read",
-        "user/Encounter.read",
-        "user/DocumentReference.read",
+        "user/Patient.rs",
+        "user/Observation.rs",
+        "user/Condition.rs",
+        "user/MedicationRequest.rs",
+        "user/DiagnosticReport.rs",
+        "user/Encounter.rs",
+        "user/DocumentReference.rs",
         "launch",
         "openid",
         "fhirUser",
