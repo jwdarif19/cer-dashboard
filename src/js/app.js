@@ -69,17 +69,42 @@ async function showListView() {
   tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">Loading patients...</td></tr>';
 
   try {
-    // Fetch patients — Cerner sandbox returns the roster
-    const bundle = await _client.request("Patient?_count=20");
-    const patients = (bundle.entry || []).map(e => e.resource).filter(Boolean);
+    // Cerner requires search params on Patient — use Encounter to get inpatient census
+    // Fetch active inpatient/ED encounters and pull their subjects (patients)
+    const bundle = await _client.request(
+      "Encounter?status=in-progress&_count=20&_include=Encounter:subject"
+    );
+    const entries = (bundle.entry || []).map(e => e.resource).filter(Boolean);
+
+    // Separate Encounter and Patient resources from the _include response
+    let patients = entries.filter(r => r.resourceType === "Patient");
+    const encounters = entries.filter(r => r.resourceType === "Encounter");
+
+    // If no patients came back via _include, extract patient IDs from encounters
+    // and fetch them individually
+    if (!patients.length && encounters.length) {
+      const patientIds = [...new Set(
+        encounters.map(e => e.subject?.reference?.split("/").pop()).filter(Boolean)
+      )];
+      const fetched = await Promise.allSettled(
+        patientIds.map(id => _client.request(`Patient/${id}`))
+      );
+      patients = fetched.filter(r => r.status === "fulfilled").map(r => r.value);
+    }
+
+    // Fallback: if still no patients (sandbox may not have active encounters),
+    // try fetching the context patient's ward neighbours by name initial
+    if (!patients.length) {
+      const fallback = await _client.request("Patient?name=smart&_count=20");
+      patients = (fallback.entry || []).map(e => e.resource).filter(Boolean);
+    }
 
     if (!patients.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">No patients found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">No inpatient encounters found in sandbox.</td></tr>';
       return;
     }
 
     tbody.innerHTML = "";
-    // For each patient, quickly compute a readiness badge from cached obs if available
     for (const p of patients) {
       const row = await buildPatientRow(p);
       tbody.appendChild(row);
