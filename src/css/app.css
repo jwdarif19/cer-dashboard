@@ -49,9 +49,31 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
+.header-left { display: flex; align-items: center; gap: 16px; }
 header h1 { font-size: 18px; }
 #user-info { font-size: 12px; opacity: 0.85; }
+
+/* ── Back button ───────────────────────────────────────────────────── */
+.back-btn {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.15); }
+
+/* ── Patient list rows ─────────────────────────────────────────────── */
+tbody tr { transition: background 0.1s; }
+tbody tr[style*="cursor"] { cursor: pointer; }
+tbody tr[style*="cursor"]:hover { background: #e8f0fb !important; }
 
 /* ── App layout ────────────────────────────────────────────────────── */
 #app { max-width: 960px; margin: 24px auto; padding: 0 16px 40px; }

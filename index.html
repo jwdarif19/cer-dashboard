@@ -3,101 +3,135 @@
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discharge Readiness Dashboard</title>
   <link rel="stylesheet" href="src/css/app.css" />
 </head>
 <body>
 
-  <!-- ── Loading state ─────────────────────────────────────────── -->
+  <header>
+    <div class="header-left">
+      <span id="back-btn" class="hidden back-btn" onclick="showListView()">← All Patients</span>
+      <h1>🏥 Discharge Readiness Dashboard</h1>
+    </div>
+    <div id="user-info"></div>
+  </header>
+
+  <!-- ── Loading state ────────────────────────────────────────────────── -->
   <div id="loading">
     <div class="spinner"></div>
     <p>Loading patient data from Cerner...</p>
   </div>
 
-  <!-- ── Error state ───────────────────────────────────────────── -->
+  <!-- ── Error state ──────────────────────────────────────────────────── -->
   <div id="error-panel" class="hidden">
     <h2>⚠️ Could not load patient data</h2>
     <p id="error-message"></p>
   </div>
 
-  <!-- ── Main dashboard ───────────────────────────────────────── -->
-  <div id="app" class="hidden">
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- LIST VIEW                                                          -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div id="list-view" class="hidden">
+    <div id="app">
 
-    <header>
-      <h1>🏥 Discharge Readiness Dashboard</h1>
-      <div id="user-info"></div>
-    </header>
+      <section class="card">
+        <h2>Inpatient Census</h2>
+        <p class="muted" style="margin-bottom:14px;font-size:13px">
+          Click a patient to view their full discharge readiness assessment.
+        </p>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Date of Birth</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>MRN</th>
+                <th>Discharge Readiness</th>
+              </tr>
+            </thead>
+            <tbody id="patient-list-body">
+              <tr><td colspan="6" class="muted" style="padding:16px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-    <!-- Patient banner -->
-    <section class="card" id="patient-card">
-      <h2>Patient</h2>
-      <div class="patient-grid">
-        <div><label>Name</label><span id="pt-name">—</span></div>
-        <div><label>Date of Birth</label><span id="pt-dob">—</span></div>
-        <div><label>Age</label><span id="pt-age">—</span></div>
-        <div><label>Gender</label><span id="pt-gender">—</span></div>
-        <div><label>MRN</label><span id="pt-mrn">—</span></div>
-        <div><label>Language</label><span id="pt-language">—</span></div>
-      </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Discharge readiness status -->
-    <section class="card" id="status-card">
-      <h2>Discharge Readiness Status</h2>
-      <div id="discharge-status" class="status-badge status-unknown">Calculating...</div>
-      <ul id="status-reasons"></ul>
-    </section>
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- DETAIL VIEW                                                        -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div id="detail-view" class="hidden">
+    <div id="app">
 
-    <!-- Vitals / Observations -->
-    <section class="card">
-      <h2>Latest Observations (Vitals &amp; Labs)</h2>
-      <div id="obs-loading" class="sub-loading">Fetching observations...</div>
-      <table id="obs-table" class="hidden">
-        <thead>
-          <tr>
-            <th>Observation</th>
-            <th>Value</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="obs-body"></tbody>
-      </table>
-      <p id="obs-empty" class="hidden muted">No observations found for this patient.</p>
-    </section>
+      <!-- Patient banner -->
+      <section class="card" id="patient-card">
+        <h2>Patient</h2>
+        <div class="patient-grid">
+          <div><label>Name</label><span id="pt-name">—</span></div>
+          <div><label>Date of Birth</label><span id="pt-dob">—</span></div>
+          <div><label>Age</label><span id="pt-age">—</span></div>
+          <div><label>Gender</label><span id="pt-gender">—</span></div>
+          <div><label>MRN</label><span id="pt-mrn">—</span></div>
+          <div><label>Language</label><span id="pt-language">—</span></div>
+        </div>
+      </section>
 
-    <!-- Active Conditions -->
-    <section class="card">
-      <h2>Active Conditions / Diagnoses</h2>
-      <div id="cond-loading" class="sub-loading">Fetching conditions...</div>
-      <ul id="cond-list"></ul>
-      <p id="cond-empty" class="hidden muted">No active conditions found.</p>
-    </section>
+      <!-- Discharge readiness status -->
+      <section class="card" id="status-card">
+        <h2>Discharge Readiness Status</h2>
+        <div id="discharge-status" class="status-badge status-unknown">Calculating...</div>
+        <ul id="status-reasons"></ul>
+      </section>
 
-    <!-- Medications -->
-    <section class="card">
-      <h2>Active Medications</h2>
-      <div id="med-loading" class="sub-loading">Fetching medications...</div>
-      <ul id="med-list"></ul>
-      <p id="med-empty" class="hidden muted">No active medications found.</p>
-    </section>
+      <!-- Vitals / Observations -->
+      <section class="card">
+        <h2>Latest Vital Signs &amp; Observations</h2>
+        <div id="obs-loading" class="sub-loading">Fetching observations...</div>
+        <table id="obs-table" class="hidden">
+          <thead>
+            <tr>
+              <th>Observation</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="obs-body"></tbody>
+        </table>
+        <p id="obs-empty" class="hidden muted">No observations found for this patient.</p>
+      </section>
 
-    <!-- Diagnostic Reports -->
-    <section class="card">
-      <h2>Recent Diagnostic Reports (Labs &amp; Imaging)</h2>
-      <div id="report-loading" class="sub-loading">Fetching reports...</div>
-      <ul id="report-list"></ul>
-      <p id="report-empty" class="hidden muted">No diagnostic reports found.</p>
-    </section>
+      <!-- Active Conditions -->
+      <section class="card">
+        <h2>Active Conditions / Diagnoses</h2>
+        <div id="cond-loading" class="sub-loading">Fetching conditions...</div>
+        <ul id="cond-list"></ul>
+        <p id="cond-empty" class="hidden muted">No active conditions found.</p>
+      </section>
 
-    <!-- Raw FHIR debug panel (hidden by default) -->
-    <section class="card" id="debug-card">
-      <h2>🔧 Raw FHIR Data (Debug)</h2>
-      <button onclick="toggleDebug()">Toggle raw JSON</button>
-      <pre id="debug-output" class="hidden"></pre>
-    </section>
+      <!-- Medications -->
+      <section class="card">
+        <h2>Active Medications</h2>
+        <div id="med-loading" class="sub-loading">Fetching medications...</div>
+        <ul id="med-list"></ul>
+        <p id="med-empty" class="hidden muted">No active medications found.</p>
+      </section>
 
-  </div><!-- /#app -->
+      <!-- Diagnostic Reports -->
+      <section class="card">
+        <h2>Recent Diagnostic Reports</h2>
+        <div id="report-loading" class="sub-loading">Fetching reports...</div>
+        <ul id="report-list"></ul>
+        <p id="report-empty" class="hidden muted">No diagnostic reports found.</p>
+      </section>
+
+    </div>
+  </div><!-- /#detail-view -->
 
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
