@@ -42,13 +42,9 @@ FHIR.oauth2.ready()
   .then(client => {
     _client = client;
     showUserInfo(client);
-    // If launched with a patient context, go straight to their detail view.
-    // Otherwise show the patient list.
-    if (client.patient && client.patient.id) {
-      showDetailView(client.patient.id);
-    } else {
-      showListView();
-    }
+    // Always show the patient list first on load.
+    // Clicking a patient row navigates to their detail view.
+    showListView();
   })
   .catch(err => {
     showError("Authentication failed: " + (err.message || err));
@@ -68,39 +64,33 @@ async function showListView() {
   const tbody = document.getElementById("patient-list-body");
   tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">Loading patients...</td></tr>';
 
+  // Cerner sandbox blocks open Patient and Encounter searches.
+  // Strategy: fetch each known sandbox test patient by ID directly.
+  // These IDs are the standard Cerner R4 sandbox patients.
+  const SANDBOX_PATIENT_IDS = [
+    "12724065", // Joe SMART      — ICU, Levofloxacin/Vancomycin
+    "12724066", // Hailey SMART   — Chorioamnionitis
+    "12724067", // Nancy SMART    — Pregnancy
+    "12724068", // Timmy SMART    — Paediatric, allergies
+    "12742399", // Wilma SMART    — Cancer / staging
+  ];
+
+  // Also include the context patient if not already in the list
+  const contextId = _client.patient?.id;
+  const idsToFetch = contextId && !SANDBOX_PATIENT_IDS.includes(contextId)
+    ? [contextId, ...SANDBOX_PATIENT_IDS]
+    : SANDBOX_PATIENT_IDS;
+
   try {
-    // Cerner requires search params on Patient — use Encounter to get inpatient census
-    // Fetch active inpatient/ED encounters and pull their subjects (patients)
-    const bundle = await _client.request(
-      "Encounter?status=in-progress&_count=20&_include=Encounter:subject"
+    const results = await Promise.allSettled(
+      idsToFetch.map(id => _client.request(`Patient/${id}`))
     );
-    const entries = (bundle.entry || []).map(e => e.resource).filter(Boolean);
-
-    // Separate Encounter and Patient resources from the _include response
-    let patients = entries.filter(r => r.resourceType === "Patient");
-    const encounters = entries.filter(r => r.resourceType === "Encounter");
-
-    // If no patients came back via _include, extract patient IDs from encounters
-    // and fetch them individually
-    if (!patients.length && encounters.length) {
-      const patientIds = [...new Set(
-        encounters.map(e => e.subject?.reference?.split("/").pop()).filter(Boolean)
-      )];
-      const fetched = await Promise.allSettled(
-        patientIds.map(id => _client.request(`Patient/${id}`))
-      );
-      patients = fetched.filter(r => r.status === "fulfilled").map(r => r.value);
-    }
-
-    // Fallback: if still no patients (sandbox may not have active encounters),
-    // try fetching the context patient's ward neighbours by name initial
-    if (!patients.length) {
-      const fallback = await _client.request("Patient?name=smart&_count=20");
-      patients = (fallback.entry || []).map(e => e.resource).filter(Boolean);
-    }
+    const patients = results
+      .filter(r => r.status === "fulfilled")
+      .map(r => r.value);
 
     if (!patients.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">No inpatient encounters found in sandbox.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px">No patients could be loaded.</td></tr>';
       return;
     }
 
